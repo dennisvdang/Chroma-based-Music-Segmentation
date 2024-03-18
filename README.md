@@ -48,14 +48,13 @@ $$D_{i,j,l} = \left( r_{i,j}, r_{i+1,j+1}, \ldots, r_{i+l,j+l} \right)$$
 
 If the segments initiating at $i$ and $j$ are identical, $D_{i,j}$ will consist solely of ones, enabling the characterization of a perfect match by:
 
-$$\min\left\{D_{i,j,l}\right\} = 1.$$
-
+$$\min\{D_{i,j,l}\} = 1.$$
 
 This criterion is relaxed by employing the empirical $p$-quantile function instead of the minimum, and we adopt a segment threshold $t_s$ less than unity. Accordingly, a repetition is defined by:
 
-$$\text{quantile}_p\left\{D_{i,j,l}\right\} > t_s.$$
+$$\text{quantile}_p\{D_{i,j,l}\} > t_s.$$
 
-The parameters $p = 0.1$ and $t_s = 0.6$ were chosen by [1]. Future research will focus on adjusting these parameters based on ground truth data. A set of repetitions $$R_{i,l} = \left\{j : \text{quantile}_p\left\{D_{i,j,l}\right\} > t_s\right\}$$ is compiled into a list $L$ of repetition sets if it describes at least one repetition (i.e., it contains more than one element $j$). In cases of segment overlap, only the index with the higher score is retained in $R_{i,l}$.
+The parameters $p = 0.1$ and $t_s = 0.6$ were chosen by [1]. Future research will focus on adjusting these parameters based on ground truth data. A set of repetitions $$R_{i,l} = \{j : \text{quantile}_p\{D_{i,j,l}\} > t_s\}$$ is compiled into a list $L$ of repetition sets if it describes at least one repetition (i.e., it contains more than one element $j$). In cases of segment overlap, only the index with the higher score is retained in $R_{i,l}$.
 
 Each set $R_{i,l}$ suggests a potential segment type, with its elements indicating the starting beats of segment instances. Given that repetition sets typically outnumber actual segment types, the heuristic of "a music editor—aiming to economize on paper—is employed: the editor would initially select the repetition set where $l \times \lvert R_{i,l} \rvert$ is maximized, then apply this criterion iteratively to the remaining song segments, effectively implementing a greedy algorithm. An exception arises if a sub-segment of a repetition is found to recur more frequently than the entire segment, prompting the selection of $R_{i,l}$ corresponding to the sub-segment."
 
