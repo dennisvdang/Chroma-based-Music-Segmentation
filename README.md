@@ -18,7 +18,7 @@ We implement the Krumhansl-Schmuckler algorithm to calculate a Key-Invariant (KI
 2. KI chromagrams inadvertently reduces the variation caused by key changes, which could be considered "noise" in the context of structural analysis, by aligning chroma vectors to a normalized key.
 
 ### Beat-Synchronous KI Chromagram 
-We synchronize the KI chroma features with the detected beats. For each beat interval, we aggregate the chroma vectors that fall within it using the median to minimize the impact of outliers. This results in a chromagram where each column corresponds to a beat interval, ensuring that the harmonic content is aligned with the musical rhythm.
+- For each beat interval, we aggregate the chroma vectors that fall within it using the median (median vs. mean aggregation seems to be negligible here). This results in a chromagram where each column corresponds to a beat interval, ensuring that the harmonic content is aligned with the musical rhythm.
 ![beat-sync-ki-chroma](/images/beat-sync-ki-chroma.webp)
 
 ### Constructing the Self-Similarity Matrix (SSM)
@@ -27,15 +27,14 @@ We synchronize the KI chroma features with the detected beats. For each beat int
 - After calculating the SSM, we take the absolute values of the matrix because it makes the SSM more interpretable and useful for identifying repeating musical structures: values closer to 1 indicate a high degree of similarity between segments, while values closer to 0 suggest dissimilarity. 
 
 #### Median Filtered SSM
-Aligning with the methods of Mauch, Noland, and Dixon [1], we then apply a diagonal median filter to the normalized matrix with `kernel_size = 5` (an odd number that conveniently happens to cover slightly over a bar of music). Diagonal median filtering helps in smoothing and minimizing the impact of minor variations or noise in the chromagram, leading to a cleaner representation of similarity across time frames. For visualizations, it enhances the visibility of significant repeating patterns by diminishing the influence of spurious correlations.
+- Aligning with the methods of [1], we then apply a diagonal median filter to the normalized matrix with `kernel_size = 5` (an odd number that conveniently happens to cover slightly over a bar of music). Diagonal median filtering helps in smoothing and minimizing the impact of minor variations or noise in the chromagram, leading to a cleaner representation of similarity across time frames. For visualizations, it enhances the visibility of significant repeating patterns by diminishing the influence of spurious correlations.
 
 #### Path-enhanced SSM
-For empirical testing, we employ path enhancement techniques on the SSM. Path enhancement serves to make diagonal paths, which represent repeating musical segments, more pronounced. This is particularly beneficial for uncovering temporal structures and patterns that recur over time, making it easier to identify repeating segments in pieces with complex structures or subtle repetitions.
+- One of the goals of this project to compare the effectiveness of median filtering versus path-enhanced SSM in facilitating accurate music segmentation. Path enhancement serves to make diagonal paths, which represent repeating musical segments, more pronounced. This is particularly beneficial for uncovering temporal structures and patterns that recur over time, making it easier to identify repeating segments in pieces with complex structures or subtle repetitions.
 
-We use `librosa.segment.path_enhance()` for path enhancement, inspired by the multi-angle path enhancement approach detailed by Müller and Kurth [2]. Unlike their method, which models tempo differences by re-sampling underlying features before generating the SSM, our approach directly enhances continuity along diagonal paths within the existing similarity matrix. This direct enhancement of the SSM facilitates the identification of repeating structures without altering the chromagram data.
+- We use `librosa.segment.path_enhance()` for path enhancement, inspired by the multi-angle path enhancement approach detailed by Müller and Kurth [2]. Unlike their method, which models tempo differences by re-sampling underlying features before generating the SSM, our approach directly enhances continuity along diagonal paths within the existing similarity matrix. This direct enhancement of the SSM facilitates the identification of repeating structures without altering the chromagram data.
 
-#### Comparing Median Filter vs. Path Enhanced SSM for Segmentation
-One of the goals of this project to compare the effectiveness of median filtering versus path-enhanced SSM in facilitating accurate music segmentation. By evaluating both approaches, we aim to determine which method and parameterse leads to more accurate and meaningful segmentation of repeating musical segments.
+- By evaluating both approaches, we aim to determine which method and parameterse leads to more accurate and meaningful segmentation of repeating musical segments.
 
 ![ssm-types](/images/ssm-types.webp)
 
