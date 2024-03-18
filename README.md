@@ -54,7 +54,8 @@ This criterion is relaxed by employing the empirical $p$-quantile function inste
 
 $$\text{quantile}_p\{D_{i,j,l}\} > t_s.$$
 
-The parameters $p = 0.1$ and $t_s = 0.6$ were chosen by [1]. Future research will focus on adjusting these parameters based on ground truth data. A set of repetitions $$R_{i,l} = \{j : \text{quantile}_p\{D_{i,j,l}\} > t_s\}$$ is compiled into a list $L$ of repetition sets if it describes at least one repetition (i.e., it contains more than one element $j$). In cases of segment overlap, only the index with the higher score is retained in $R_{i,l}$.
+The parameters $p = 0.1$ and $t_s = 0.6$ were chosen by [1]. Future research will focus on adjusting these parameters based on ground truth data. A set of repetitions $$R_{i,l} = \{j : \text{quantile}_p\{D_{i,j,l}\} > t_s\}$$
+ is compiled into a list $L$ of repetition sets if it describes at least one repetition (i.e., it contains more than one element $j$). In cases of segment overlap, only the index with the higher score is retained in $R_{i,l}$.
 
 Each set $R_{i,l}$ suggests a potential segment type, with its elements indicating the starting beats of segment instances. Given that repetition sets typically outnumber actual segment types, the heuristic of "a music editor—aiming to economize on paper—is employed: the editor would initially select the repetition set where $l \times \lvert R_{i,l} \rvert$ is maximized, then apply this criterion iteratively to the remaining song segments, effectively implementing a greedy algorithm. An exception arises if a sub-segment of a repetition is found to recur more frequently than the entire segment, prompting the selection of $R_{i,l}$ corresponding to the sub-segment."
 
