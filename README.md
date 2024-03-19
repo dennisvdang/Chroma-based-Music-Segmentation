@@ -37,30 +37,21 @@ We implement the Krumhansl-Schmuckler algorithm to calculate a Key-Invariant (KI
 ![ssm-types](/images/ssm-types.webp)
 
 ### Finding Repetitions in Self-Similarity Matrices
-The `find_repetitions` function is designed to identify repeating segments within a piece of music by analyzing its SSM. The code is a custom implementation adapted from the methodology presented by Mauch, Noland, and Dixon (2009) [1] at the 10th International Society for Music Information Retrieval Conference (ISMIR) and attempts to do the following:
+To analyze a song for repeated musical segments, we compare segments of the music that start at different beats but are of equal length. We're specifically looking for segments that are either exactly the same or very similar to each other.
 
-
-A search for repetitions is conducted across all diagonals in the matrix, spanning a variety of segment lengths. Employing the same parameters as [1], we designate a minimum segment length of $m_1 = 12$ beats and a maximum of $m_M = 128$ beats, creating a vast search space. To optimize our search, we only consider beats with a correlation $r$ exceeding a threshold $t_r$, and we presuppose that segment durations are quantized to multiples of four beats. We employed a threshold of $t_r = 0.65$ similar to [1]. Future endeavors aim to refine $t_r$ based on empirical data. The original study further narrows the search space by only allowing segments that start at the beginning of bars, calculated using a harmony change likelihood function and beat detection function, which is outside the scope of this project.
-
-To evaluate the similarity between a segment starting at beat $i$ and another commencing at beat $j$ of identical length $l$, we examine the diagonal elements:
+**Segment Comparison**: For each pair of segments starting at beats $i$ and $j$, we examine their corresponding elements (or beats) to assess how similar they are. This evaluation generates a series of values, recorded in the Self-Similarity Matrix as Pearson correlation coefficients, which quantify the similarity over the full span of the segments under comparison.
 
 $$D_{i,j,l} = \left( r_{i,j}, r_{i+1,j+1}, \ldots, r_{i+l,j+l} \right)$$
 
-If the segments initiating at $i$ and $j$ are identical, $D_{i,j}$ will consist solely of ones, enabling the characterization of a perfect match by:
+**Identifying Perfect and Near-Perfect Matches**: Ideally, if two segments are exactly the same, all the comparison values would be ones, indicating a perfect match. However, not all repetitions are perfect due to variations in performance, recording, or intended musical changes. Thus, near-perfect matches are allowed and are defined using two parameters, $p$ and $t_s$, where we used the same parameter values of $p = 0.1$ and $t_s$ as the original study.
 
-$$\min\{D_{i,j,l}\} = 1.$$
+**Handling overlaps**: Once segments that meet or exceed the similarity threshold are identified, they are added to a list of repetitions. If there's any overlap between identified repetitions, only the ones with the highest similarity (according to the set thresholds) are kept.
 
-This criterion is relaxed by employing the empirical $p$-quantile function instead of the minimum, and we adopt a segment threshold $t_s$ less than unity. Accordingly, a repetition is defined by:
+**Searching for Repetitions**: A search for repetitions is conducted across all diagonals in the matrix, spanning a variety of segment lengths. Employing the same parameters as [1], we designate a minimum segment length of $m_1 = 12$ beats and a maximum of $m_M = 128$ beats, creating a vast search space. To optimize our search, we only consider beats with a correlation $r$ exceeding a threshold $t_r$, and we presuppose that segment durations are quantized to multiples of four beats. We employed a threshold of $t_r = 0.65$ similar to [1]. Future endeavors aim to refine $t_r$ based on empirical data. The original study further narrows the search space by only allowing segments that start at the beginning of bars, calculated using a harmony change likelihood function and beat detection function, which is outside the scope of this project.
 
-$$\text{quantile}_p\{D_{i,j,l}\} > t_s.$$
-
-The parameters $p = 0.1$ and $t_s = 0.6$ were chosen by [1]. Future research will focus on adjusting these parameters based on ground truth data. A set of repetitions $$R_{i,l} = \{j : \text{quantile}_p\{D_{i,j,l}\} > t_s\}$$
- is compiled into a list $L$ of repetition sets if it describes at least one repetition (i.e., it contains more than one element $j$). In cases of segment overlap, only the index with the higher score is retained in $R_{i,l}$.
-
-Each set $R_{i,l}$ suggests a potential segment type, with its elements indicating the starting beats of segment instances. Given that repetition sets typically outnumber actual segment types, the heuristic of "a music editor—aiming to economize on paper—is employed: the editor would initially select the repetition set where $l \times \lvert R_{i,l} \rvert$ is maximized, then apply this criterion iteratively to the remaining song segments, effectively implementing a greedy algorithm. An exception arises if a sub-segment of a repetition is found to recur more frequently than the entire segment, prompting the selection of $R_{i,l}$ corresponding to the sub-segment."
-
-As an exact implementation of the greedy algorithm described by [1] is difficult due to linguistic ambiguities, we created 3 variations of a greedy selection algorithm and plan to test their performance alongside the two SSM types.
-
+**Greedy Algorithm for Selection**: 
+- We replicate the greedy algorithm used to identify the most noteworthy repeating segments. This process starts by selecting the repetition set whose product of `length` and `similarity score` is the highest, then continues to evaluate all segments under this criterion. An exception to this selection process is made when a sub-segment occurs more frequently within longer ones; the subsegment is given precedence in these cases. While the precise mechanics of the original greedy algorithm as described by [1] remain somewhat open to interpretation due to linguistic ambiguity, our approach has been to closely emulate the described methodology while also developing two additional algorithms to facilitate downstream analyses. 
+- We created an additional greedy algorithm that aims to maximize the total length of the music that is covered by identified repeating patterns. 
 ### Greedy Segment Selection Algorithms
 This section describes the original and two alternative greedy algorithms implemented for segment selection, highlighting their methodologies and differences.
 
